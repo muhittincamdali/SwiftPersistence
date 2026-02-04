@@ -1,64 +1,167 @@
-<div align="center">
+<p align="center">
+  <img src="Assets/logo.png" alt="SwiftPersistence" width="200"/>
+</p>
 
-# 💿 SwiftPersistence
+<h1 align="center">SwiftPersistence</h1>
 
-**Unified data persistence - SwiftData, CoreData, UserDefaults & Keychain in one API**
+<p align="center">
+  <strong>💿 Unified data persistence - SwiftData, CoreData, UserDefaults & Keychain in one API</strong>
+</p>
 
-[![Swift](https://img.shields.io/badge/Swift-5.9+-F05138?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
-[![iOS](https://img.shields.io/badge/iOS-15.0+-000000?style=for-the-badge&logo=apple&logoColor=white)](https://developer.apple.com/ios/)
-[![SPM](https://img.shields.io/badge/SPM-Compatible-FA7343?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org/package-manager/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-
-[Features](#-features) • [Installation](#-installation) • [Quick Start](#-quick-start)
-
-</div>
-
----
-
-## ✨ Features
-
-- 🗄️ **Unified API** — One interface for all storage types
-- 📊 **SwiftData** — Modern iOS 17+ support
-- 💾 **CoreData** — Legacy project support
-- 🔐 **Keychain** — Secure credential storage
-- ⚙️ **UserDefaults** — Preferences made easy
-- 🔄 **Migration** — Seamless data migration tools
+<p align="center">
+  <a href="https://github.com/muhittincamdali/SwiftPersistence/actions/workflows/ci.yml">
+    <img src="https://github.com/muhittincamdali/SwiftPersistence/actions/workflows/ci.yml/badge.svg" alt="CI"/>
+  </a>
+  <img src="https://img.shields.io/badge/Swift-6.0-orange.svg" alt="Swift 6.0"/>
+  <img src="https://img.shields.io/badge/iOS-17.0+-blue.svg" alt="iOS 17.0+"/>
+</p>
 
 ---
 
-## 📦 Installation
+## Why SwiftPersistence?
+
+iOS has many storage options - SwiftData, CoreData, UserDefaults, Keychain, File System. Each has different APIs. **SwiftPersistence** provides a unified interface for all of them.
 
 ```swift
-dependencies: [
-    .package(url: "https://github.com/muhittincamdali/SwiftPersistence.git", from: "1.0.0")
-]
+// One API for all storage
+let store = Store<User>(backend: .swiftData)
+try await store.save(user)
+let users = try await store.fetch()
+
+// Easy switching
+let store = Store<User>(backend: .coreData) // Same API!
+let store = Store<User>(backend: .fileSystem)
 ```
 
----
+## Features
 
-## 🚀 Quick Start
+| Feature | Description |
+|---------|-------------|
+| 🔄 **Unified API** | Same interface for all backends |
+| 💾 **SwiftData** | iOS 17+ native |
+| 📦 **CoreData** | Legacy support |
+| ⚙️ **UserDefaults** | Simple key-value |
+| 🔐 **Keychain** | Secure storage |
+| 📁 **FileSystem** | JSON/Plist files |
+| 🔍 **Queries** | Type-safe predicates |
+
+## Quick Start
 
 ```swift
 import SwiftPersistence
 
-// UserDefaults
-@Persisted("username") var username: String?
+// Define model
+@Persistable
+struct User: Identifiable {
+    let id: UUID
+    var name: String
+    var email: String
+}
 
-// Keychain
-@SecureStore("api_token") var token: String?
+// Create store
+let store = Store<User>()
 
-// SwiftData
-let store = PersistenceStore<User>()
+// CRUD operations
 try await store.save(user)
-let users = try await store.fetchAll()
+let users = try await store.fetch()
+let user = try await store.find(id: userId)
+try await store.delete(user)
 ```
 
----
+## Backends
 
-## 📄 License
+### SwiftData (Default)
 
-MIT License - see [LICENSE](LICENSE)
+```swift
+let store = Store<User>(backend: .swiftData)
+```
 
-## 👨‍💻 Author
+### CoreData
 
-**Muhittin Camdali** • [@muhittincamdali](https://github.com/muhittincamdali)
+```swift
+let store = Store<User>(backend: .coreData(
+    modelName: "MyApp",
+    inMemory: false
+))
+```
+
+### UserDefaults
+
+```swift
+let store = Store<Settings>(backend: .userDefaults(
+    suiteName: "group.myapp"
+))
+```
+
+### Keychain
+
+```swift
+let store = Store<Credentials>(backend: .keychain(
+    accessGroup: "com.myapp.shared",
+    accessibility: .afterFirstUnlock
+))
+```
+
+### File System
+
+```swift
+let store = Store<Document>(backend: .fileSystem(
+    directory: .documents,
+    format: .json
+))
+```
+
+## Querying
+
+```swift
+// Fetch with predicate
+let adults = try await store.fetch(
+    where: \.age >= 18,
+    sortedBy: \.name
+)
+
+// Complex queries
+let results = try await store.fetch {
+    $0.where(\.isActive == true)
+    $0.where(\.role == .admin)
+    $0.sortBy(\.createdAt, .descending)
+    $0.limit(10)
+}
+```
+
+## Relationships
+
+```swift
+@Persistable
+struct Post {
+    let id: UUID
+    var title: String
+    @Relationship var author: User
+    @Relationship var comments: [Comment]
+}
+```
+
+## Migrations
+
+```swift
+Store<User>.migrate { migration in
+    migration.add(\.newField, defaultValue: "")
+    migration.rename(\.oldName, to: \.newName)
+    migration.delete(\.deprecatedField)
+}
+```
+
+## Testing
+
+```swift
+// In-memory store for tests
+let testStore = Store<User>(backend: .inMemory)
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT License
