@@ -15,6 +15,9 @@
 
 <h1 align="center">SwiftPersistence</h1>
 
+## 🚀 Killer Feature: Framework-Agnostic Repositories
+Switch from CoreData to SwiftData without changing your business logic. Our `AgnosticRepository` protocol fully decouples your UI from the underlying persistence engine.
+
 <p align="center">
   <strong>💿 Unified data persistence - SwiftData, CoreData, UserDefaults & Keychain in one API</strong>
 </p>
