@@ -1,193 +1,30 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Swift-6.0-FA7343?style=for-the-badge&logo=swift&logoColor=white" alt="Swift 6.0"/>
-  <img src="https://img.shields.io/badge/Platform-iOS%20|%20macOS%20|%20visionOS-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="Platform"/>
-  <img src="https://img.shields.io/badge/Standard-Unified%20Core-5856D6?style=for-the-badge" alt="Standard"/>
-</p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/muhittincamdali/iOS-Offline-First-Framework/master/.github/brand/banner-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/muhittincamdali/iOS-Offline-First-Framework/master/.github/brand/banner-light.svg"><img src="https://raw.githubusercontent.com/muhittincamdali/iOS-Offline-First-Framework/master/.github/brand/banner-light.svg" alt="Offline-First Framework: A local store for Swift apps that keeps working offline and syncs with your server."></picture></p>
 
----
+<p align="center"><a href="README.md">English</a> · <a href="README.tr.md">Türkçe</a></p>
 
-> **🛡️ PART OF THE 2026 UNIFIED CORE**
-> This repository is a verified component of 'The Endless March' initiative. Purified for Swift 6, zero-dependency, and engineered for maximum hardware saturation.
-> 
-> *Flagship Engines:* [SwiftNetwork](https://github.com/muhittincamdali/SwiftNetwork) | [SwiftAI](https://github.com/muhittincamdali/SwiftAI) | [LiquidGlassKit](https://github.com/muhittincamdali/LiquidGlassKit)
+# SwiftPersistence has moved
 
----
+This project now lives in [iOS-Offline-First-Framework](https://github.com/muhittincamdali/iOS-Offline-First-Framework). This repository is archived and no longer receives changes.
 
-<h1 align="center">SwiftPersistence</h1>
+The file store, the Keychain store, record migrations, and the retry policy and circuit breaker were rewritten there for Swift 6, with tests, and sit inside an offline store that queues local changes and syncs them with your server. Not everything from this repository was carried over: the repository abstraction over SwiftData and Core Data, the event bus, the metrics collector and the error handler have no counterpart in the new package. The [changelog](https://github.com/muhittincamdali/iOS-Offline-First-Framework/blob/master/CHANGELOG.md) lists what was merged.
 
-## 🚀 Killer Feature: Framework-Agnostic Repositories
-Switch from CoreData to SwiftData without changing your business logic. Our `AgnosticRepository` protocol fully decouples your UI from the underlying persistence engine.
+- Storage: [Sources/OfflineFirstFramework/Storage](https://github.com/muhittincamdali/iOS-Offline-First-Framework/tree/master/Sources/OfflineFirstFramework/Storage)
+- Sync, retry and circuit breaker: [Sources/OfflineFirstFramework/Sync](https://github.com/muhittincamdali/iOS-Offline-First-Framework/tree/master/Sources/OfflineFirstFramework/Sync)
+- Documentation: [OfflineFirstFramework](https://muhittincamdali.github.io/iOS-Offline-First-Framework/documentation/offlinefirstframework/)
 
-<p align="center">
-  <strong>💿 Unified data persistence - SwiftData, CoreData, UserDefaults & Keychain in one API</strong>
-</p>
+## Install the new package
 
-<p align="center">
-  <a href="https://github.com/muhittincamdali/SwiftPersistence/actions/workflows/ci.yml">
-    <img src="https://github.com/muhittincamdali/SwiftPersistence/actions/workflows/ci.yml/badge.svg" alt="CI"/>
-  </a>
-  <img src="https://img.shields.io/badge/Swift-6.0-orange.svg" alt="Swift 6.0"/>
-  <img src="https://img.shields.io/badge/iOS-17.0+-blue.svg" alt="iOS 17.0+"/>
-</p>
-
----
-
-## Why SwiftPersistence?
-
-iOS has many storage options - SwiftData, CoreData, UserDefaults, Keychain, File System. Each has different APIs. **SwiftPersistence** provides a unified interface for all of them.
+The new package needs iOS 17+, macOS 14+, tvOS 17+, watchOS 10+ or visionOS 1+.
 
 ```swift
-// One API for all storage
-let store = Store<User>(backend: .swiftData)
-try await store.save(user)
-let users = try await store.fetch()
-
-// Easy switching
-let store = Store<User>(backend: .coreData) // Same API!
-let store = Store<User>(backend: .fileSystem)
+dependencies: [
+    .package(url: "https://github.com/muhittincamdali/iOS-Offline-First-Framework.git", from: "2.0.0")
+],
+targets: [
+    .target(name: "YourApp", dependencies: [
+        .product(name: "OfflineFirstFramework", package: "iOS-Offline-First-Framework")
+    ])
+]
 ```
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔄 **Unified API** | Same interface for all backends |
-| 💾 **SwiftData** | iOS 17+ native |
-| 📦 **CoreData** | Legacy support |
-| ⚙️ **UserDefaults** | Simple key-value |
-| 🔐 **Keychain** | Secure storage |
-| 📁 **FileSystem** | JSON/Plist files |
-| 🔍 **Queries** | Type-safe predicates |
-
-## Quick Start
-
-```swift
-import SwiftPersistence
-
-// Define model
-@Persistable
-struct User: Identifiable {
-    let id: UUID
-    var name: String
-    var email: String
-}
-
-// Create store
-let store = Store<User>()
-
-// CRUD operations
-try await store.save(user)
-let users = try await store.fetch()
-let user = try await store.find(id: userId)
-try await store.delete(user)
-```
-
-## Backends
-
-### SwiftData (Default)
-
-```swift
-let store = Store<User>(backend: .swiftData)
-```
-
-### CoreData
-
-```swift
-let store = Store<User>(backend: .coreData(
-    modelName: "MyApp",
-    inMemory: false
-))
-```
-
-### UserDefaults
-
-```swift
-let store = Store<Settings>(backend: .userDefaults(
-    suiteName: "group.myapp"
-))
-```
-
-### Keychain
-
-```swift
-let store = Store<Credentials>(backend: .keychain(
-    accessGroup: "com.myapp.shared",
-    accessibility: .afterFirstUnlock
-))
-```
-
-### File System
-
-```swift
-let store = Store<Document>(backend: .fileSystem(
-    directory: .documents,
-    format: .json
-))
-```
-
-## Querying
-
-```swift
-// Fetch with predicate
-let adults = try await store.fetch(
-    where: \.age >= 18,
-    sortedBy: \.name
-)
-
-// Complex queries
-let results = try await store.fetch {
-    $0.where(\.isActive == true)
-    $0.where(\.role == .admin)
-    $0.sortBy(\.createdAt, .descending)
-    $0.limit(10)
-}
-```
-
-## Relationships
-
-```swift
-@Persistable
-struct Post {
-    let id: UUID
-    var title: String
-    @Relationship var author: User
-    @Relationship var comments: [Comment]
-}
-```
-
-## Migrations
-
-```swift
-Store<User>.migrate { migration in
-    migration.add(\.newField, defaultValue: "")
-    migration.rename(\.oldName, to: \.newName)
-    migration.delete(\.deprecatedField)
-}
-```
-
-## Testing
-
-```swift
-// In-memory store for tests
-let testStore = Store<User>(backend: .inMemory)
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-MIT License
-
----
-
-## 📈 Star History
-
-<a href="https://star-history.com/#muhittincamdali/SwiftPersistence&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=muhittincamdali/SwiftPersistence&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=muhittincamdali/SwiftPersistence&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=muhittincamdali/SwiftPersistence&type=Date" />
- </picture>
-</a>
+The public types changed between the two packages, so moving over means renaming imports and call sites. The old code stays here, unchanged, for reference.
